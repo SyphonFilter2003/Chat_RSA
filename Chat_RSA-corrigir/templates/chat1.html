@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat - Alice</title>
+</head>
+<body>
+    <h1>Chat (Alice)</h1>
+    <div id="messages">
+        {% for msg in messages %}
+            <p><strong>{{ msg.sender }}:</strong> {{ msg.text }}</p>
+        {% endfor %}
+    </div>
+    <form action="/send" method="POST">
+        <input type="text" name="text" placeholder="Digite uma mensagem">
+        <button type="submit">Enviar</button>
+    </form>
+</body>
+</html>

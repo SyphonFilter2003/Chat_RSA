@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat do Bob</title>
+    <style>
+        #chat { margin: 20px; padding: 10px; border: 1px solid #ccc; height: 300px; overflow-y: scroll; }
+        #message { width: 80%; padding: 8px; }
+        button { padding: 8px 15px; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Chat do Bob</h1>
+    <div id="chat">
+        {% for msg in messages %}
+            <p><strong>{{ msg.sender }}:</strong> {{ msg.text }}</p>
+        {% endfor %}
+    </div>
+    <input type="text" id="message" placeholder="Digite sua mensagem">
+    <button onclick="sendMessage()">Enviar</button>
+    <p id="error" class="error"></p>
+
+    <script>
+        async function sendMessage() {
+            const input = document.getElementById("message");
+            const error = document.getElementById("error");
+            error.textContent = "";
+            
+            if (!input.value.trim()) {
+                error.textContent = "Digite uma mensagem";
+                return;
+            }
+
+            try {
+                const response = await fetch("/send", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                    },
+                    body: `text=${encodeURIComponent(input.value)}`
+                });
+
+                const result = await response.json();
+                if (!response.ok) {
+                    error.textContent = result.error || "Erro ao enviar";
+                } else {
+                    input.value = "";
+                    updateChat();
+                }
+            } catch (err) {
+                error.textContent = "Falha na conexão";
+            }
+        }
+
+        async function updateChat() {
+            const response = await fetch("/messages");
+            const messages = await response.json();
+            const chatDiv = document.getElementById("chat");
+            chatDiv.innerHTML = messages.map(msg => 
+                `<p><strong>${msg.sender}:</strong> ${msg.text}</p>`
+            ).join("");
+        }
+
+        // Atualiza a cada 2 segundos
+        setInterval(updateChat, 2000);
+    </script>
+</body>
+</html>
